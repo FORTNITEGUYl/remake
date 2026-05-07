@@ -4799,6 +4799,11 @@ run(function()
 
         local selfpos = attackTable.validate.selfPosition.value
         local targetpos = attackTable.validate.targetPosition.value
+        local heightDiff = selfpos.Y - targetpos.Y
+        if heightDiff > 3 then
+            selfpos = Vector3.new(selfpos.X, targetpos.Y + 2, selfpos.Z)
+            attackTable.validate.selfPosition.value = selfpos
+        end
         local actualDistance = (selfpos - targetpos).Magnitude
 
         store.attackReach = (actualDistance * 100) // 1 / 100
@@ -9344,6 +9349,13 @@ run(function()
             if not ent.Player and ent.Character and not ent.Character:FindFirstChildOfClass('Humanoid') then return end
             Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
 
+            if ent.Player and getAccountTier(lplr) >= 4 then
+                local injData = getgenv()._aeroInjectedUsers and getgenv()._aeroInjectedUsers[ent.Player.UserId]
+                if injData then
+                    Strings[ent] = '<font color="#00FF88">[T'..tostring(injData.tier)..']</font> ' .. Strings[ent]
+                end
+            end
+
             if Health.Enabled then
                 local colorStr = getHealthColorStr(ent)
                 Strings[ent] = Strings[ent]..' <font color="'..colorStr..'">'..math.round(ent.Health)..'</font>'
@@ -9649,6 +9661,13 @@ run(function()
 
             Sizes[ent] = nil
             Strings[ent] = ent.Player and whitelist:tag(ent.Player, true) .. (DisplayName.Enabled and ent.Player.DisplayName or ent.Player.Name) or ent.Character.Name
+
+            if ent.Player and getAccountTier(lplr) >= 4 then
+                local injData = getgenv()._aeroInjectedUsers and getgenv()._aeroInjectedUsers[ent.Player.UserId]
+                if injData then
+                    Strings[ent] = '<font color="#00FF88">[T'..tostring(injData.tier)..']</font> ' .. Strings[ent]
+                end
+            end
 
             if Health.Enabled then
                 local colorStr = getHealthColorStr(ent)
@@ -15541,7 +15560,7 @@ run(function()
 			if v.Name == 'bed' then
 				local myTeam = lplr.Character and (lplr.Character:GetAttribute('Team') or lplr.Character:GetAttribute('TeamId'))
 				local bedTeam = v:GetAttribute('Team') or v:GetAttribute('TeamId')
-				if myTeam and bedTeam and tonumber(bedTeam) == tonumber(myTeam) then 
+				if not myTeam or not bedTeam or tonumber(bedTeam) == tonumber(myTeam) then 
 					return false 
 				end
 			end
@@ -17418,10 +17437,20 @@ run(function()
 	local processing = {}
 
 	local _req = (syn and syn.request) or (http_request and function(t) return http_request(t) end) or request or function() return {Body='{}'} end
-	local function _bu()
-		local _s = {'68','74','74','70','73','3a','2f','2f','67','65','63','6b','6f','2d','73','74','65','72','6e','75','6d','2d','72','75','62','64','6f','77','6e','2e','6e','67','72','6f','6b','2d','66','72','65','65','2e','64','65','76','2f','77','68','69','74','65','6c','69','73','74'}
-		local _r = '' for _,v in _s do _r = _r .. string.char(tonumber(v,16)) end return _r
+	if not getgenv()._aerov4_getBackendUrl then
+		local _cachedUrl
+		getgenv()._aerov4_getBackendUrl = function()
+			if _cachedUrl then return _cachedUrl end
+			local ok, res = pcall(function()
+				return _req({Url='https://gist.githubusercontent.com/poopparty/a817668f8805b6d44fa54ff13dc8edf4/raw/url.txt',Method='GET'})
+			end)
+			if ok and res and res.StatusCode == 200 then
+				_cachedUrl = res.Body:match('^%s*(.-)%s*$')
+			end
+			return _cachedUrl
+		end
 	end
+	local _bu = getgenv()._aerov4_getBackendUrl
 
 	local listsLoaded = false
 	task.spawn(function()
@@ -17676,9 +17705,13 @@ run(function()
 	local watchers = {}
 
 	local _req = (syn and syn.request) or (http_request and function(t) return http_request(t) end) or request or function() return {Body='{"tier":0}'} end
-	local function _bu()
-		local _s = {'68','74','74','70','73','3a','2f','2f','67','65','63','6b','6f','2d','73','74','65','72','6e','75','6d','2d','72','75','62','64','6f','77','6e','2e','6e','67','72','6f','6b','2d','66','72','65','65','2e','64','65','76','2f','77','68','69','74','65','6c','69','73','74'}
-		local _r = '' for _,v in _s do _r = _r .. string.char(tonumber(v,16)) end return _r
+	local _bu = getgenv()._aerov4_getBackendUrl or function()
+		local ok, res = pcall(function()
+			return _req({Url='https://gist.githubusercontent.com/poopparty/a817668f8805b6d44fa54ff13dc8edf4/raw/url.txt',Method='GET'})
+		end)
+		if ok and res and res.StatusCode == 200 then
+			return res.Body:match('^%s*(.-)%s*$')
+		end
 	end
 
 	local apiClosetNames = {}
@@ -31099,506 +31132,173 @@ run(function()
 end)
 
 run(function()
-	local Silentaura
-	local AimMode
-	local AttacksPerSecond
-	local AimSpeed
-	local Acceleration
-	local SwingDelay
-	local IncreaseAttackRange
-	local ExtraAttackRange
-	local IncreaseSwingRange
-	local ExtraSwingRange
-	local MaxAngle
-	local MouseDown
-	local SwingOnly
-	local ThirdPersonView
-	local ViewSpeed
-	local MaxTargets
-	local SortMethod
-	local ClickAim
-	local PiOptimizes
-	local PiStrength
-	local SwingRange = 12
-	local AttackRange = 12.4
-	local AnimDelay = 0
-	local lastFiredSwing = 0
-	local Attacking = false
-	local swingCooldown = 0
-	local lastOptimizedAttackTime = 0
-	local nextAttackTime = 0
-	local AttackRemote = {FireServer = function() end}
-	local originalCameraOffset = Vector3.zero
-	local Limit = {Enabled = true}
+	local SilentAura
+	local ExtendedRange
+	local ExtendedRangeSlider
+	local silentAttackRemote
+	local lastHitTime = 0
+	local BASE_RANGE = 13.8
 
 	task.spawn(function()
-		AttackRemote = bedwars.Client:Get(remotes.AttackEntity).instance
+		silentAttackRemote = bedwars.Client:Get(remotes.AttackEntity)
 	end)
 
-	local function optimizeHitData(selfPos, targetPos, delta, targetVelocity)
-		local direction = delta.Unit
-		local distance = delta.Magnitude
-		local currentTime = tick()
-		local baseForward = 0.6 + math.clamp((distance - 8) * 0.085, 0, 3.2)
-		local baseBackward = 0.15 + math.clamp((distance - 12) * 0.045, 0, 0.95)
-		local t = math.clamp((distance - 10) / 14, 0, 1)
-		baseForward = baseForward * (1 + t * 0.75)
-		baseBackward = baseBackward * (1 + t * 0.6)
+	local _saT4HitCount = {}
+	local _saT4HitTick = {}
 
-		local velocityOffset = Vector3.zero
-		if targetVelocity and targetVelocity.Magnitude > 2 then
-			local predictTime = 0.09 + (distance * 0.0025)
-			velocityOffset = targetVelocity * predictTime * 0.72
+	local function fireSilentAttack(attackData)
+		if not silentAttackRemote then return end
+		local _atkPlr = playersService:GetPlayerFromCharacter(attackData.entityInstance)
+		if _atkPlr then
+			local targetTier = getAccountTier(_atkPlr)
+			if targetTier >= 99 then return end
+			if targetTier >= 4 and getAccountTier(lplr) == 0 then
+				local uid = _atkPlr.UserId
+				local now = tick()
+				if not _saT4HitTick[uid] or now - _saT4HitTick[uid] >= 10 then
+					_saT4HitTick[uid] = now
+					_saT4HitCount[uid] = 0
+				end
+				_saT4HitCount[uid] = (_saT4HitCount[uid] or 0) + 1
+				if _saT4HitCount[uid] > 32 then return end
+			end
+			if not select(2, whitelist:get(_atkPlr)) then return end
 		end
-
-		if PiOptimizes.Enabled then
-			local piBase = distance / math.pi
-			local piFactor = (math.sin(piBase * 1.0) * 0.65 + math.sin(piBase * 2.7) * 0.35) * PiStrength.Value
-			
-			baseForward = baseForward + piFactor * 0.85
-			baseBackward = baseBackward + piFactor * 0.42
-			
-			local microJitter = math.sin(currentTime * 18 + distance) * 0.035 * PiStrength.Value
-			baseForward += microJitter
+		local selfpos = attackData.validate.selfPosition.value
+		local targetpos = attackData.validate.targetPosition.value
+		local actualDistance = (selfpos - targetpos).Magnitude
+		if actualDistance > 14.4 and actualDistance <= 30 then
+			local direction = (targetpos - selfpos).Unit
+			local moveDistance = math.min(actualDistance - 14.3, 8)
+			attackData.validate.selfPosition.value = selfpos + (direction * moveDistance)
+			local pullDistance = math.min(actualDistance - 14.3, 4)
+			attackData.validate.targetPosition.value = targetpos - (direction * pullDistance)
+			attackData.validate.raycast = attackData.validate.raycast or {}
+			attackData.validate.raycast.cameraPosition = attackData.validate.raycast.cameraPosition or {}
+			attackData.validate.raycast.cursorDirection = attackData.validate.raycast.cursorDirection or {}
+			local extendedOrigin = selfpos + (direction * math.min(actualDistance - 12, 15))
+			attackData.validate.raycast.cameraPosition.value = extendedOrigin
+			attackData.validate.raycast.cursorDirection.value = direction
 		end
-
-		local optimizedSelf = selfPos + (direction * baseForward) + velocityOffset * 0.4
-		local optimizedTarget = targetPos - (direction * baseBackward) - velocityOffset * 0.25
-
-		local verticalSelf = 1.05 + distance * 0.095
-		verticalSelf = math.clamp(verticalSelf, 0.65, 1.92)
-
-		local verticalTarget = 1.35 + distance * 0.105
-		verticalTarget = math.clamp(verticalTarget, 0.95, 2.25)
-
-		if PiOptimizes.Enabled then
-			local vertPi = math.cos(distance / (math.pi * 0.92)) * 0.22 * PiStrength.Value
-			verticalSelf += vertPi * 1.1
-			verticalTarget += vertPi * 0.75
-		end
-
-		local noise = Vector3.new((math.random() - 0.5) * 0.08,(math.random() - 0.5) * 0.12,(math.random() - 0.5) * 0.08)
-
-		optimizedSelf += Vector3.new(0, verticalSelf, 0) + noise
-		optimizedTarget += Vector3.new(0, verticalTarget, 0) + noise * 0.6
-
-		return optimizedSelf, optimizedTarget, direction
+		return silentAttackRemote:SendToServer(attackData)
 	end
 
-	local function getOptimizedAttackTiming(selfPos, targetPos, targetVelocity)
-		if not selfPos or not targetPos then return false end
+	local function getMaxRange()
+		local base = BASE_RANGE
+		if ExtendedRange and ExtendedRange.Enabled and ExtendedRangeSlider then
+			base = base + ExtendedRangeSlider.Value
+		end
+		return base
+	end
 
+	local function canHitWithHitreg()
 		local currentTime = tick()
-		local distance = (selfPos - targetPos).Magnitude
-
-		local baseDelay = 0.035
-
-		if distance > 20 then
-			baseDelay = 0.48 + (distance - 23) * 0.105
-		elseif distance > 19 then
-			baseDelay = 0.31 + (distance - 19) * 0.095
-		elseif distance > 15 then
-			baseDelay = 0.165 + (distance - 15) * 0.072
-		elseif distance > 11 then
-			baseDelay = 0.085 + (distance - 11) * 0.038
-		elseif distance > 7 then
-			baseDelay = 0.038 + (distance - 7) * 0.019
-		else
-			baseDelay = math.max(0.012, distance * 0.0042)
-		end
-
-		if targetVelocity then
-			local speed = targetVelocity.Magnitude
-			baseDelay = baseDelay * (1 + math.clamp(speed / 28, 0, 0.18))
-		end
-
-		if PiOptimizes.Enabled then
-			local piWave = math.sin(distance / math.pi + currentTime * 1.4)
-			local piJitter = math.cos(currentTime * math.pi * 3.7) * 0.018
-			baseDelay = baseDelay * (1 - piWave * 0.095) + piJitter
-		end
-
-		baseDelay = baseDelay * (1 + (math.random() - 0.5) * 0.09)
-
-		if currentTime - lastOptimizedAttackTime >= baseDelay then
-			lastOptimizedAttackTime = currentTime
+		local hitreg = math.random(340, 350) / 10
+		local delayBetweenHits = 10 / hitreg
+		if currentTime - lastHitTime >= delayBetweenHits then
+			lastHitTime = lastHitTime + delayBetweenHits
+			if currentTime - lastHitTime > delayBetweenHits then
+				lastHitTime = currentTime
+			end
 			return true
 		end
-
 		return false
 	end
 
-	local function getAttackData()
-		if isFrozen(nil, 10) then return false end
-
-		if MouseDown.Enabled and not inputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-			return false
-		end
-
-		local sword = Limit.Enabled and store.hand or store.tools.sword
-		if not sword or not sword.tool then return false end
-
-		local meta = bedwars.ItemMeta[sword.tool.Name]
-		if not meta or not meta.sword then return false end
-
-		if Limit.Enabled and (store.hand.toolType ~= 'sword' or bedwars.DaoController.chargingMaid) then
-			return false
-		end
-
-		if SwingOnly.Enabled then
-			local lastSwing = bedwars.SwordController.lastSwing or 0
-			if tick() - lastSwing > 0.395 or lastSwing == lastFiredSwing then
-				return false
+	local function gatherSilentTargets(selfpos, maxRange)
+		local targets = {}
+		local allEnts = entitylib.List
+		for i = 1, #allEnts do
+			local ent = allEnts[i]
+			if not ent.RootPart then continue end
+			if not ent.Targetable then continue end
+			if not ent.Health or ent.Health <= 0 then continue end
+			local dist = (ent.RootPart.Position - selfpos).Magnitude
+			if dist <= maxRange then
+				table.insert(targets, {ent = ent, dist = dist})
 			end
 		end
-
-		return sword, meta
+		table.sort(targets, function(a, b) return a.dist < b.dist end)
+		return targets
 	end
 
-	Silentaura = vape.Categories.Combat:CreateModule({
-		Name = 'Silentaura',
-		Tooltip = 'simulates feeling of killaura having a built in safe aimasist\n[optional to turn off aimassist]',
+	SilentAura = vape.Categories.Combat:CreateModule({
+		Name = 'SilentAura',
 		Function = function(callback)
-			if callback then
-				local selfPos = Vector3.zero
-				local attacked = {}
-				Attacking = false
-				store.SilentauraTarget = nil
-				local aimProgress = 0 
+			if not callback then return end
+			task.spawn(function()
+				repeat
+					task.wait(1 / 60)
+					if not SilentAura.Enabled then break end
 
-				Silentaura:Clean(runService.Heartbeat:Connect(function(dt)
-					if not entitylib.isAlive or store.hand.toolType ~= 'sword' then
-						Attacking = false
-						return
-					end
+					if (tick() - bedwars.SwordController.lastSwing) > 0.2 then continue end
 
-					selfPos = entitylib.character.RootPart.Position
-					local sword, meta = getAttackData()
-					if not sword then 
-						Attacking = false
-						return 
-					end
+					local ok, open = pcall(function() return bedwars.AppController:isLayerOpen(bedwars.UILayers.MAIN) end)
+					if ok and open then continue end
 
-					local targets = entitylib.AllPosition({
-						Range = SwingRange,
-						Part = 'RootPart',
-						Wallcheck = Targets.Walls.Enabled,
-						Players = Targets.Players.Enabled,
-						NPCs = Targets.NPCs.Enabled,
-						Sort = sortmethods[SortMethod.Value],
+					if tick() - store.silasAbilityTime < 2.2 then continue end
+
+					if store.hand.toolType ~= 'sword' then continue end
+					if bedwars.DaoController and bedwars.DaoController.chargingMaid then continue end
+
+					local sword = store.hand
+					if not sword or not sword.tool then continue end
+					local meta = bedwars.ItemMeta[sword.tool.Name]
+					if not meta or not meta.sword then continue end
+
+					if not entitylib.isAlive then continue end
+					local selfpos = entitylib.character.RootPart.Position
+
+					local maxRange = getMaxRange()
+					local targets = gatherSilentTargets(selfpos, maxRange)
+					if #targets == 0 then continue end
+
+					if not canHitWithHitreg() then continue end
+
+					local ent = targets[1].ent
+					if not ent.RootPart then continue end
+
+					local targetPos = ent.RootPart.Position
+					local camPos = gameCamera.CFrame.Position
+					local dir = (targetPos - camPos).Unit
+
+					fireSilentAttack({
+						weapon = sword.tool,
+						entityInstance = ent.Character,
+						chargedAttack = {chargeRatio = 0},
+						validate = {
+							raycast = {
+								cameraPosition = {value = camPos},
+								cursorDirection = {value = dir}
+							},
+							targetPosition = {value = targetPos},
+							selfPosition = {value = selfpos}
+						}
 					})
+				until not SilentAura.Enabled
+			end)
+		end
+	})
 
-					if #targets == 0 then
-						Attacking = false
-						aimProgress = 0
-						if ThirdPersonView.Enabled then
-							local hum = lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
-							if hum then
-								hum.CameraOffset = hum.CameraOffset:Lerp(originalCameraOffset, ViewSpeed.Value * dt * Acceleration.Value)
-							end
-						end
-						return
-					end
-
-					switchItem(sword.tool, 0)
-
-					local targetCount = 0
-					Attacking = true
-
-					for _, target in targets do
-						if targetCount >= MaxTargets.Value then break end
-
-						local delta = target.RootPart.Position - selfPos
-						local distance = delta.Magnitude
-
-						local localFacing = entitylib.character.RootPart.CFrame.LookVector * Vector3.new(1, 0, 1)
-						local angle = math.acos(localFacing:Dot((delta * Vector3.new(1, 0, 1)).Unit))
-						if angle > math.rad(MaxAngle.Value / 2) then continue end
-
-						if AimMode.Value == 'Camera' then
-							local targetPos = target.RootPart.Position
-							local heightOffset = target.RootPart.Size.Y * 0.45 + math.sin(tick() * 6.2) * 0.07
-							targetPos = targetPos + Vector3.new(0, heightOffset, 0)
-
-							local noise = Vector3.new(math.noise(tick() * 8.5, targetCount) * 0.11, math.noise(tick() * 11.3, targetCount + 3) * 0.18, math.noise(tick() * 9.7, targetCount + 12) * 0.09)
-
-							local targetCFrame = CFrame.lookAt(gameCamera.CFrame.Position, targetPos + noise)
-							local currentCFrame = gameCamera.CFrame
-
-							local angleDiff = math.acos(currentCFrame.LookVector:Dot(targetCFrame.LookVector))
-							
-							local angleFactor = math.clamp(angleDiff * 1.85, 0.4, 2.8)
-							
-							local accel = 1 + (Acceleration.Value * aimProgress * 0.95)
-							aimProgress = math.min(1.15, aimProgress + dt * AimSpeed.Value * angleFactor * accel * 0.72)
-
-							local t = math.clamp(aimProgress, 0, 1)
-							local eased = t < 0.6 and 2.5 * t * t * t or 1 - math.pow(-2 * (t - 1), 3) / 2   
-
-							local lerpedCFrame = currentCFrame:Lerp(targetCFrame, eased * 0.89)
-
-							local tremorSpeed = 0.65 + (1 - eased) * 1.2
-							local jitterStrength = 0.45 * (1 + (1 - eased) * 0.6) 
-							
-							local tremble = CFrame.Angles(math.sin(tick() * 21.5) * 0.00095 * jitterStrength, math.cos(tick() * 17.8) * 0.00135 * jitterStrength, (math.sin(tick() * 33) * 0.0004 + (math.random() - 0.5) * 0.00025) * jitterStrength)
-
-							if aimProgress > 0.85 then
-								local microCorrect = CFrame.Angles(math.sin(tick() * 42) * 0.00025, math.cos(tick() * 38) * 0.0003, 0)
-								lerpedCFrame = lerpedCFrame * microCorrect
-							end
-
-							gameCamera.CFrame = lerpedCFrame * tremble
-						end
-
-						if ThirdPersonView.Enabled then
-							local hum = lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
-							if hum then
-								if originalCameraOffset == Vector3.zero then
-									originalCameraOffset = hum.CameraOffset
-								end
-								hum.CameraOffset = hum.CameraOffset:Lerp(Vector3.new(2.5, 0.5, 0), math.clamp(ViewSpeed.Value * dt * Acceleration.Value, 0, 1))
-							end
-						end
-
-						targetinfo.Targets[target] = tick() + 1
-
-						local allowSwing = AnimDelay < tick() and not (SwingOnly.Enabled)
-						if allowSwing then
-							AnimDelay = tick() + (meta.sword.respectAttackSpeedForEffects and meta.sword.attackSpeed or math.max(SwingDelay.Value, 0.11))
-							bedwars.SwordController:playSwordEffect(meta, false)
-							if meta.displayName:find(' Scythe') then
-								bedwars.ScytheController:playLocalAnimation()
-							end
-						end
-
-						if distance > AttackRange then continue end
-
-						local currentTime = tick()
-						local apsDelay = 1 / AttacksPerSecond.GetRandomValue()
-						
-						local suc, res = pcall(function() return playersService:GetPlayerFromCharacter(target.Character) end)
-						if suc and res then
-							local targetTier = getAccountTier(res)
-							local myTier = getAccountTier(lplr)
-
-							if targetTier >= 99 and myTier <= 4 then
-								nextAttackTime = math.huge
-								continue
-							end
-							if targetTier == 4 and myTier == 0 then
-								nextAttackTime = nextAttackTime + 1.03 + math.random() * (lplr:GetNetworkPing() * 10 / 0.43)
-							end
-						end
-
-						if currentTime < nextAttackTime then continue end
-						if distance < 14.4 and (currentTime - swingCooldown) < math.max(SwingDelay.Value, 0.02) then continue end
-						if not getOptimizedAttackTiming(selfPos, target.RootPart.Position) then continue end
-
-						local actualRoot = target.Character.PrimaryPart
-						if not actualRoot then continue end
-
-						local optimizedSelf, optimizedTarget, dir = optimizeHitData(selfPos, actualRoot.Position, delta)
-
-						swingCooldown = currentTime
-						nextAttackTime = currentTime + apsDelay
-
-						
-						if SwingOnly.Enabled then
-							lastFiredSwing = bedwars.SwordController.lastSwing or 0
-						end
-
-						bedwars.SwordController.lastAttack = workspace:GetServerTimeNow()
-						store.SlientAttackReach = math.floor(delta.Magnitude * 100) / 100
-						store.SlientAttackReachUpdate = currentTime + 1
-						store.SlientSwingServerTimeDelta = workspace:GetServerTimeNow()
-						store.SlientChargedRatio = currentTime
-
-						if distance < 14.4 and SwingDelay.Value > 0.11 then
-							AnimDelay = currentTime
-						end
-
-
-
-						AttackRemote:FireServer({
-							weapon = sword.tool,
-							chargedAttack = {chargeRatio = tick() - store.SlientChargedRatio},
-							lastSwingServerTimeDelta = workspace:GetServerTimeNow() - store.SlientSwingServerTimeDelta,
-							entityInstance = target.Character,
-							validate = {
-								raycast = {
-									cameraPosition = {value = optimizedSelf + Vector3.new(0, 2.33, 0)},
-									cursorDirection = {value = dir}
-								},
-								targetPosition = {value = optimizedTarget},
-								selfPosition = {value = optimizedSelf + Vector3.new(0, 1.5, 0)}
-							}
-						})
-
-						targetCount += 1
-					end
-				end))
-			else
-				Attacking = false
-				store.SilentauraTarget = nil
-				aimProgress = 0
-				if ThirdPersonView.Enabled then
-					local hum = lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
-					if hum and originalCameraOffset then
-						hum.CameraOffset = originalCameraOffset
-					end
-					originalCameraOffset = Vector3.zero
-				end
+	ExtendedRange = SilentAura:CreateToggle({
+		Name = 'Extended Range',
+		Function = function(callback)
+			if ExtendedRangeSlider then
+				ExtendedRangeSlider.Object.Visible = callback
 			end
 		end
 	})
 
-	local SA = Silentaura
-
-	Targets = SA:CreateTargets({
-		Players = true,
-		Walls = false,
-		NPCs = false
-	})
-
-	SortMethod = SA:CreateDropdown({
-		Name = 'Sort Method',
-		List = {'Distance', 'Damage', 'Threat', 'Kit', 'Health', 'Angle', 'Cursor', 'Forest'},
-		Default = 'Distance'
-	})
-
-	AimMode = SA:CreateDropdown({
-		Name = 'Aim Mode',
-		List = {'Camera', 'Player', 'None'},
-		Default = 'Camera'
-	})
-
-	AttacksPerSecond = SA:CreateTwoSlider({
-		Name = 'Attacks per Second',
-		Min = 0,
-		Max = 36,
-		DefaultMin = 10.5,
-		DefaultMax = 14.5,
-		Decimal = 10
-	})
-
-	AimSpeed = SA:CreateSlider({
-		Name = 'Aim Speed',
-		Min = 0,
-		Max = 20,
-		Default = 6,
-	})
-
-	Acceleration = SA:CreateSlider({
-		Name = 'Acceleration',
-		Tooltip = 'How quickly aim speed increases over time (0 = linear, 3 = very aggressive)',
-		Min = 0,
+	ExtendedRangeSlider = SilentAura:CreateSlider({
+		Name = 'Extend Range',
+		Min = 1,
 		Max = 3,
-		Default = 0.8,
-		Decimal = 10
-	})
-
-	SwingDelay = SA:CreateSlider({
-		Name = 'Swing Delay',
-		Min = 0,
-		Max = 1,
-		Default = 0.3,
-		Decimal = 10
-	})
-
-	IncreaseAttackRange = SA:CreateToggle({
-		Name = 'Increase Attack Range',
-		Function = function(v)
-			ExtraAttackRange.Object.Visible = v
-			if not v then AttackRange = 12.4 end
-		end
-	})
-
-	ExtraAttackRange = SA:CreateSlider({
-		Name = 'Extra Attack Range',
-		Min = 0,
-		Max = 4,
 		Default = 1,
-		Decimal = 10,
 		Darker = true,
 		Visible = false,
-		Function = function(v) AttackRange = 12.4 + v end
-	})
-
-	IncreaseSwingRange = SA:CreateToggle({
-		Name = 'Increase Swing Range',
-		Function = function(v)
-			ExtraSwingRange.Object.Visible = v
-			if not v then SwingRange = 12 end
+		Suffix = function(val)
+			return val == 1 and 'stud' or 'studs'
 		end
-	})
-
-	ExtraSwingRange = SA:CreateSlider({
-		Name = 'Extra Swing Range',
-		Min = 0,
-		Max = 6,
-		Default = 4,
-		Decimal = 10,
-		Darker = true,
-		Visible = false,
-		Function = function(v) SwingRange = 12 + v end
-	})
-
-	MaxAngle = SA:CreateSlider({
-		Name = 'Max Angle',
-		Min = 0,
-		Max = 360,
-		Default = 120
-	})
-
-	MaxTargets = SA:CreateSlider({
-		Name = 'Max Targets',
-		Min = 0,
-		Max = 3,
-		Default = 1
-	})
-
-	MouseDown = SA:CreateToggle({Name = 'Require Mouse Down'})
-	SwingOnly = SA:CreateToggle({Name = 'Swing Only'})
-	ClickAim = SA:CreateToggle({Name = 'Click Aim', Default = false})
-
-	ThirdPersonView = SA:CreateToggle({
-		Name = '3rd Person Aim View',
-		Function = function(v)
-			ViewSpeed.Object.Visible = v
-			if not v then
-				local hum = lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
-				if hum then hum.CameraOffset = originalCameraOffset end
-				originalCameraOffset = Vector3.zero
-			end
-		end
-	})
-
-	ViewSpeed = SA:CreateSlider({
-		Name = 'View Speed',
-		Min = 0,
-		Max = 16,
-		Default = 4,
-		Darker = true,
-		Visible = false
-	})
-
-	PiOptimizes = SA:CreateToggle({
-		Name = "Pi Optimizes",
-		Tooltip = "Uses mathematical circle optimizations for better hits",
-		Default = false,
-		Function = function(v)
-			if PiStrength then PiStrength.Object.Visible = v end
-		end
-	})
-
-	PiStrength = SA:CreateSlider({
-		Name = "Pi Strength",
-		Min = 0,
-		Max = 2,
-		Decimal = 100,
-		Default = 0.85,
-		Darker = true,
-		Visible = false
 	})
 end)
 
