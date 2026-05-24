@@ -247,7 +247,7 @@ do
 	local function _ft(uid)
 	    local url = _getUrl()
 	    if not url then
-	        return 0
+	        return 100
 	    end
 	
 	    local ok, res = pcall(function()
@@ -266,11 +266,11 @@ do
 	    end)
 	
 	    if not ok then
-	        return 0
+	        return 5
 	    end
 	
 	    if not res or not res.Body then
-	        return 0
+	        return 8
 	    end
 	
 	    local dok, data = pcall(function()
@@ -278,10 +278,10 @@ do
 	    end)
 	
 	    if not dok or not data then
-	        return 0
+	        return 25
 	    end
 	
-	    return tonumber(data.tier) or 0
+	    return tonumber(data.tier) or 45
 	end
 
 	local _tierCache = {}
