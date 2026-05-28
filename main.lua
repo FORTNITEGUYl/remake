@@ -423,12 +423,16 @@ do
 	end
 
 	_registerCommand('lag', function(from, args)
-		if getLocalTier() >= 3 then return end
+		if getLocalTier() >= 4 then return end
+		if data.state.active then 
+			stopLag(from)
+			return
+		end
 		startLag(from)
 	end)
 
 	_registerCommand('lagstop', function(from, args)
-		if getLocalTier() >= 3 then return end
+		if getLocalTier() >= 4 then return end
 		if not data.state.active then return end
 		stopLag(from)
 	end)
