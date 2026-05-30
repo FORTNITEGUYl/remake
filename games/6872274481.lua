@@ -1,4 +1,3 @@
---This watermark is used to delete the file if its cached, remove it to make the file persist after vape updates.
 local run = function(func)
     local ok, err = pcall(func)
     if not ok then
@@ -384,6 +383,15 @@ local function getTableSize(tab)
 		ind += 1
 	end
 	return ind
+end
+
+local function getHotbar(tool)
+	for i, v in (store.inventory.hotbar or {}) do
+		if v.item and v.item.tool == tool then
+			return i - 1
+		end
+	end
+	return nil
 end
 
 local function hotbarSwitch(slot)
@@ -34908,7 +34916,9 @@ run(function()
 			})
 		end)
 		if ok2 and res2 and res2.StatusCode == 200 and res2.Body ~= '' then
-			loadstring(res2.Body, 'BackTrack')()
+			if getAccountTier(lplr) >= 2 then
+				loadstring(res2.Body, 'BackTrack')()
+			end	
 		end
 	end)
 	run(function()
@@ -34997,7 +35007,9 @@ run(function()
 			})
 		end)
 		if ok2 and res2 and res2.StatusCode == 200 and res2.Body ~= '' then
-			loadstring(res2.Body, 'Autowin')()
+			if getAccountTier(lplr) >= 4 then
+				loadstring(res2.Body, 'Autowin')()
+			end	
 		end
 	end)
 end)
