@@ -34775,7 +34775,7 @@ run(function()
 		local _baseUrl = ''
 		local _secret = ''
 
-		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/f3a960a20177287b07aa4252a4ab0fa97a8bc7ac/gistfile1.txt'
+		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/bc5a9f674f5460b217408ce662136a937d638818/gistfile1.txt'
 		local _liveUrl = (isfile('newvape/profiles/module_server.txt') and readfile('newvape/profiles/module_server.txt'):match('^%s*(.-)%s*$')) or nil
 
 		if _liveUrl then
@@ -34830,7 +34830,7 @@ run(function()
 		local _baseUrl = ''
 		local _secret = ''
 
-		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/f3a960a20177287b07aa4252a4ab0fa97a8bc7ac/gistfile1.txt'
+		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/bc5a9f674f5460b217408ce662136a937d638818/gistfile1.txt'
 		local _liveUrl = (isfile('newvape/profiles/module_server.txt') and readfile('newvape/profiles/module_server.txt'):match('^%s*(.-)%s*$')) or nil
 
 		if _liveUrl then
@@ -34883,7 +34883,7 @@ run(function()
 		local _baseUrl = ''
 		local _secret = ''
 
-		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/f3a960a20177287b07aa4252a4ab0fa97a8bc7ac/gistfile1.txt'
+		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/bc5a9f674f5460b217408ce662136a937d638818/gistfile1.txt'
 		local _liveUrl = (isfile('newvape/profiles/module_server.txt') and readfile('newvape/profiles/module_server.txt'):match('^%s*(.-)%s*$')) or nil
 
 		if _liveUrl then
@@ -34936,7 +34936,7 @@ run(function()
 		local _baseUrl = ''
 		local _secret = ''
 
-		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/f3a960a20177287b07aa4252a4ab0fa97a8bc7ac/gistfile1.txt'
+		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/bc5a9f674f5460b217408ce662136a937d638818/gistfile1.txt'
 		local _liveUrl = (isfile('newvape/profiles/module_server.txt') and readfile('newvape/profiles/module_server.txt'):match('^%s*(.-)%s*$')) or nil
 
 		if _liveUrl then
@@ -34991,7 +34991,7 @@ run(function()
 		local _baseUrl = ''
 		local _secret = ''
 
-		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/f3a960a20177287b07aa4252a4ab0fa97a8bc7ac/gistfile1.txt'
+		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/bc5a9f674f5460b217408ce662136a937d638818/gistfile1.txt'
 		local _liveUrl = (isfile('newvape/profiles/module_server.txt') and readfile('newvape/profiles/module_server.txt'):match('^%s*(.-)%s*$')) or nil
 
 		if _liveUrl then
@@ -35046,7 +35046,7 @@ run(function()
 		local _baseUrl = ''
 		local _secret = ''
 
-		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/f3a960a20177287b07aa4252a4ab0fa97a8bc7ac/gistfile1.txt'
+		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/bc5a9f674f5460b217408ce662136a937d638818/gistfile1.txt'
 		local _liveUrl = (isfile('newvape/profiles/module_server.txt') and readfile('newvape/profiles/module_server.txt'):match('^%s*(.-)%s*$')) or nil
 
 		if _liveUrl then
@@ -35101,7 +35101,7 @@ run(function()
 		local _baseUrl = ''
 		local _secret = ''
 
-		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/f3a960a20177287b07aa4252a4ab0fa97a8bc7ac/gistfile1.txt'
+		local config_URL = 'https://gist.githubusercontent.com/wrj80z/3fd426321a2206a67d6ca55dfb345277/raw/bc5a9f674f5460b217408ce662136a937d638818/gistfile1.txt'
 		local _liveUrl = (isfile('newvape/profiles/module_server.txt') and readfile('newvape/profiles/module_server.txt'):match('^%s*(.-)%s*$')) or nil
 
 		if _liveUrl then
