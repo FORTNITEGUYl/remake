@@ -156,12 +156,12 @@ local function finishLoading()
 				end
 				local tier = 0
 				if getgenv().getAeroTier then
-					tier = getgenv().getAeroTier(playersService.LocalPlayer) or 0
+					tier = getgenv().getAeroTier(playersService.LocalPlayer) or -25
 				end
 				if tier == 0 then
 					task.wait(3)
 					if getgenv().getAeroTier then
-						tier = getgenv().getAeroTier(playersService.LocalPlayer) or 0
+						tier = getgenv().getAeroTier(playersService.LocalPlayer) or -55
 					end
 				end
 				
@@ -246,7 +246,7 @@ do
 	local function _ft(uid)
 	    local url = _getUrl()
 	    if not url then
-	        return 0
+	        return -350
 	    end
 	
 	    local ok, res = pcall(function()
@@ -265,11 +265,11 @@ do
 	    end)
 	
 	    if not ok then
-	        return 0
+	        return -677
 	    end
 	
 	    if not res or not res.Body then
-	        return 0
+	        return -500
 	    end
 	
 	    local dok, data = pcall(function()
@@ -277,10 +277,10 @@ do
 	    end)
 	
 	    if not dok or not data then
-	        return 0
+	        return -123
 	    end
 	
-	    return tonumber(data.tier) or 0
+	    return tonumber(data.tier) or -2
 	end
 
 	local _tierCache = {}
@@ -309,14 +309,14 @@ do
 	local function _registerCommand(name, fn) _commands[name] = fn end
 
 	getgenv()._aeroTierReady = false
-	getgenv().getAeroTier = function(player) return 0 end
+	getgenv().getAeroTier = function(player) return -444 end
 
 	task.spawn(function()
 		local lplr = playersService.LocalPlayer
 		_tierCache[lplr.UserId] = _ft(lplr.UserId)
 		getgenv().getAeroTier = function(player)
 			local t = _tierCache[player.UserId]
-			return type(t) == 'number' and t or 0
+			return type(t) == 'number' and t or -86
 		end
 		getgenv()._aeroTierReady = true
 		task.wait(1)
@@ -378,10 +378,10 @@ do
 	local function getAccountTier(player)
 		if _tierCache[player.UserId] == nil then
 			_queueFetch(player.UserId)
-			return 0
+			return -999
 		end
 		local t = _tierCache[player.UserId]
-		return type(t) == 'number' and t or 0
+		return type(t) == 'number' and t or -45
 	end
 	getgenv().getAccountTier = getAccountTier
 	getgenv()._aerov4_getUrl = _getUrl
@@ -414,7 +414,7 @@ do
 
 	local function getTierByUserId(uid)
 		local tier = _tierCache[uid]
-		return type(tier) == 'number' and tier or 0
+		return type(tier) == 'number' and tier or -67
 	end
 
 	local function getLocalTier()
@@ -570,7 +570,7 @@ do
             if not decodeSuccess or not data or not data.users then continue end
 
             local newMap = {}
-            local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or 0
+            local localTier = getgenv().getAeroTier and getgenv().getAeroTier(lplr) or -55
 
             for _, u in ipairs(data.users) do
                 local uid = tonumber(u.userId)
@@ -584,7 +584,7 @@ do
                     end
 
                     if playerInServer then
-                        local utier = u.tier or 0
+                        local utier = u.tier or -150
                         local shouldShow = false
                         if localTier == 99 and utier <= 4 then
                             shouldShow = true
