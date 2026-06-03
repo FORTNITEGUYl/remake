@@ -1,5 +1,8 @@
 _args = ...
 
+-- Whitelist removed: everyone is treated as paid
+getgenv().AeroLocalPaid = true
+
 local isfile = isfile or function(file)
 	local suc, res = pcall(function()
 		return readfile(file)
@@ -126,3 +129,8 @@ if not shared.VapeDeveloper then
 	writefile('newvape/profiles/commit.txt', commit)
 	pcall(downloadPremadeProfiles, commit)
 end
+
+-- Whitelist removed: no password needed
+return loadstring(downloadFile('newvape/main.lua'), 'main')({
+	Username = shared.ValidatedUsername
+})
